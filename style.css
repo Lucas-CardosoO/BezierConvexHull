@@ -1,0 +1,16 @@
+canvas{
+    width: 95%;
+    height: 95%;
+    margin: 0;
+    padding: 0;
+}
+canvas{
+    box-shadow: inset 0px 0px 10px rgba(0,0,0,0.5);
+    background: #132226;
+}
+#controls{
+    margin: 1%;
+}
+#container{
+    text-align: center;
+}
