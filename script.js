@@ -46,6 +46,7 @@ function drawEverything() {
         draw(element);
     });
     drawControlPoligonals();
+    drawBezier();
 }
 
 function draw(circle) {
@@ -76,6 +77,34 @@ function addPoint(point) {
     pointArray.push()
 }
 
+function deCasteljau(points, t) {
+    if (points.length == 1) {
+        return points[0];
+    }
+    else {
+        var newpoints = [];
+        for(i=0; i < points.length - 1; i++) {
+            var x = (1-t) * points[i].x + t * points[i+1].x;
+            var y = (1-t) * points[i].y + t * points[i+1].y;
+            newpoints.push({x: x, y: y});
+        }
+        return deCasteljau(newpoints, t);
+    }
+}
+
+function drawBezier(){
+    var point1 = pointArray[0];
+    if(pointArray.length > 2) { 
+        for (let index = 0; index <= 1; index += 1.0/numberOft) {
+            var point2 = deCasteljau(pointArray, index);
+
+            color = "#FFFFFF";
+
+            drawLine(point1, point2, color);
+            point1 = point2;
+        }
+    }
+}
 
 
 var generalRadius = 16;
@@ -83,6 +112,10 @@ var container = document.getElementById('container');
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
 var evaluationsNumber = document.getElementById('evaluations');
+var controlPointsElem = document.getElementById('controlPoints');
+var controlPoligonalElem = document.getElementById('controlPoligonal');
+var convexHullElem = document.getElementById('convexHull');
+var bezierCurveElem = document.getElementById('bezierCurve');
 
 var pointArray = Array();
 
