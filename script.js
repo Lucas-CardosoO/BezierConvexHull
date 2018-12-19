@@ -42,11 +42,32 @@ function pointClicked(click){
 
 function drawEverything() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if(controlPointsElem.checked){
+        drawPoints();
+    }
+
+    if(controlPoligonalElem.checked){
+        drawControlPoligonals();
+    }
+
+    if(bezierCurveElem.checked){
+        drawBezier();
+    }
+
+    if(convexHullElem.checked){
+        drawConvexHull();
+    }
+}
+
+function drawConvexHull(){
+
+}
+
+function drawPoints() {
     pointArray.forEach(element => {
         draw(element);
     });
-    drawControlPoligonals();
-    drawBezier();
 }
 
 function draw(circle) {
@@ -95,7 +116,7 @@ function deCasteljau(points, t) {
 function drawBezier(){
     var point1 = pointArray[0];
     if(pointArray.length > 2) { 
-        for (let index = 0; index <= 1; index += 1.0/numberOft) {
+        for (let index = 0; index < 1; index += 1.0/numberOft) {
             var point2 = deCasteljau(pointArray, index);
 
             color = "#FFFFFF";
@@ -103,11 +124,15 @@ function drawBezier(){
             drawLine(point1, point2, color);
             point1 = point2;
         }
+
+        if(numberOft > 0){
+            drawLine(point1, pointArray[pointArray.length - 1]);
+        }
     }
 }
 
 
-var generalRadius = 16;
+var generalRadius = 8;
 var container = document.getElementById('container');
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
@@ -152,7 +177,6 @@ canvas.addEventListener('dblclick', function(e) {
     });
 
     pointArray.splice(delIndex, 1);
-
     drawEverything();
 });
 
@@ -174,6 +198,49 @@ document.getElementById("clear").onclick = function(){
 };
 
 evaluationsNumber.addEventListener(("change"), (e) => {
-    numberOft = document.getElementById("evaluations").value;
-    console.log(numberOft);
+    var value = document.getElementById("evaluations").value;
+    if(value >= 0){
+        numberOft = value;
+    } else {
+        alert("Apenas números positivos");
+        document.getElementById("evaluations").value = 0;
+    }
+    drawEverything();
 });
+
+controlPointsElem.addEventListener(("change"), (e) => {
+    drawEverything();
+});
+controlPoligonalElem.addEventListener(("change"), (e) => {
+    drawEverything();
+});
+convexHullElem.addEventListener(("change"), (e) => {
+    drawEverything();
+});
+bezierCurveElem.addEventListener(("change"), (e) => {
+    drawEverything();
+});
+
+function cross(a, b, c, d) {
+    return (a.x-b.x)*(c.y-d.y) - (a.y-b.y)*(c.x-d.x);
+  };
+  
+  function convexhull(points) {
+    if(points.length < 3) return; 
+    var pts = points.slice();
+    pts.sort(function(a, b) {
+      if(a.x != b.x) return a.x < b.x;
+      else return a.y < b.y;
+    });
+    var hull = new Array();
+    for(i = 0; i < pts.length; i++) {
+      while(hull.length > 2 && cross(hull[hull.length-1], hull[hull.length-2], pts[i], hull[hull.length-2]) <= 0) hull.pop();
+      hull.push(pts[i]);
+    }
+    var lowerHullLimit = hull.length + 1;
+    for(i = n - 2; i >= 0; i--) {
+      while(hull.length >= lowerHullLimit && cross(hull[hull.length-1], hull[hull.length-2], pts[i], hull[hull.length-2]) <= 0) hull.pop();
+      hull.push(pts[i]);
+    }
+    return hull;
+  }
