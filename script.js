@@ -23,7 +23,7 @@ function clickedAnyPoint(click){
         if (isInCircle(element, click)){
             moveIndex = index;
             touchedAny = true;
-        }canvas
+        }
     }
     return touchedAny;
 }
@@ -61,7 +61,19 @@ function drawEverything() {
 }
 
 function drawConvexHull(){
+    if(pointArray.length >= 3){
+        var convexHullPoints = convexhull(pointArray);
 
+        var color = "#00FFFF";
+        for (let index = 0; index < convexHullPoints.length - 1; index++) {
+            var point1 = convexHullPoints[index];
+            var point2 = convexHullPoints[index + 1];
+            
+            drawLine(point1, point2, color);
+        }
+
+        drawLine(convexHullPoints[0], convexHullPoints[convexHullPoints.length - 1], color);
+    }
 }
 
 function drawPoints() {
@@ -131,6 +143,41 @@ function drawBezier(){
     }
 }
 
+function cross(a, b, c) {
+    return (b.x-a.x)*(c.y-a.y) - (b.y-a.y)*(c.x-a.x);
+}
+  
+function convexhull(points) {
+    if(points.length < 3) return; 
+    var pts = points.slice();
+    pts.sort(function(a, b) {
+        return a.x == b.x ? a.y - b.y : a.x - b.x;
+        // if(a.y != b.y) return a.y < b.y;
+        // else return a.x < b.x;
+        //return a.x*a.x + a.y*a.y > b.x*b.x + b.y*b.y;
+    });
+    var hull = new Array();
+    for(i = 0; i < pts.length; i++) {
+        while(hull.length >= 2 && cross(hull[hull.length-2], hull[hull.length-1], pts[i]) <= 0) {
+            hull.pop();
+        }
+        hull.push(pts[i]);
+    }
+    var lowerHullLimit = hull.length + 1;
+
+    var hullUpper = new Array();
+    for(i = pts.length - 1; i >= 0; i--) {
+        while(hullUpper.length >= 2 && cross(hullUpper[hullUpper.length-2], hullUpper[hullUpper.length-1], pts[i]) <= 0) {
+            hullUpper.pop();
+        }
+        hullUpper.push(pts[i]);
+    }
+
+    hullUpper.pop();
+    hull.pop();
+
+    return hull.concat(hullUpper);
+}
 
 var generalRadius = 8;
 var container = document.getElementById('container');
@@ -221,26 +268,4 @@ bezierCurveElem.addEventListener(("change"), (e) => {
     drawEverything();
 });
 
-function cross(a, b, c, d) {
-    return (a.x-b.x)*(c.y-d.y) - (a.y-b.y)*(c.x-d.x);
-  };
-  
-  function convexhull(points) {
-    if(points.length < 3) return; 
-    var pts = points.slice();
-    pts.sort(function(a, b) {
-      if(a.x != b.x) return a.x < b.x;
-      else return a.y < b.y;
-    });
-    var hull = new Array();
-    for(i = 0; i < pts.length; i++) {
-      while(hull.length > 2 && cross(hull[hull.length-1], hull[hull.length-2], pts[i], hull[hull.length-2]) <= 0) hull.pop();
-      hull.push(pts[i]);
-    }
-    var lowerHullLimit = hull.length + 1;
-    for(i = n - 2; i >= 0; i--) {
-      while(hull.length >= lowerHullLimit && cross(hull[hull.length-1], hull[hull.length-2], pts[i], hull[hull.length-2]) <= 0) hull.pop();
-      hull.push(pts[i]);
-    }
-    return hull;
-  }
+
