@@ -23,9 +23,21 @@ function clickedAnyPoint(click){
         if (isInCircle(element, click)){
             moveIndex = index;
             touchedAny = true;
-        }
+        }canvas
     }
     return touchedAny;
+}
+
+function pointClicked(click){
+    var pointIndex = 0;
+    for (let index = 0; index < pointArray.length; index++) {
+        const element = pointArray[index];
+        if (isInCircle(element, click)){
+            moveIndex = index;
+            pointIndex = index;
+        }
+    }
+    return pointIndex;
 }
 
 function drawEverything() {
@@ -33,32 +45,54 @@ function drawEverything() {
     pointArray.forEach(element => {
         draw(element);
     });
+    drawControlPoligonals();
 }
 
 function draw(circle) {
     ctx.beginPath();
     ctx.fillStyle = "#FF0000";
-    console.log(circle);
     ctx.arc(circle.x, circle.y, circle.radius , 0, 2*Math.PI);
     ctx.fill();
 }
 
+function drawControlPoligonals() {
+    for (let index = 0; index < pointArray.length - 1; index++) {
+        const element1 = pointArray[index];
+        const element2 = pointArray[index + 1];
+        color = "#00FF00";
+        drawLine(element1, element2, color);
+    }
+}
+
+function drawLine(element1, element2, color) {
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.moveTo(element1.x, element1.y);
+    ctx.lineTo(element2.x, element2.y);
+    ctx.stroke();
+}
+
+function addPoint(point) {
+    pointArray.push()
+}
+
+
+
+var generalRadius = 16;
 var container = document.getElementById('container');
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
+var evaluationsNumber = document.getElementById('evaluations');
+
 var pointArray = Array();
-pointArray.push({
-    x: 100,
-    y: 100,
-    radius: 16
-});
-pointArray.push({
-    x: 200,
-    y: 200,
-    radius: 16
-});
+
+var bezierPoints = Array();
+
+var numberOft = 500;
+
 var move = false;
 var moveIndex = 0;
+
 
 resizeToFit();
 drawEverything();
@@ -68,7 +102,25 @@ canvas.addEventListener('mousedown', function(e) {
         x: e.offsetX,
         y: e.offsetY
     }) 
+    if (!move) {
+        pointArray.push({
+            x: e.offsetX,
+            y: e.offsetY,
+            radius: generalRadius
+        })
+        drawEverything();
+    }
+});
 
+canvas.addEventListener('dblclick', function(e) {
+    var delIndex = pointClicked({
+        x: e.offsetX,
+        y: e.offsetY
+    });
+
+    pointArray.splice(delIndex, 1);
+
+    drawEverything();
 });
 
 canvas.addEventListener('mousemove', function(e) {
@@ -81,4 +133,14 @@ canvas.addEventListener('mousemove', function(e) {
 
 canvas.addEventListener('mouseup', function(e) {
     move = false;
+});
+
+document.getElementById("clear").onclick = function(){
+    pointArray = new Array();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+};
+
+evaluationsNumber.addEventListener(("change"), (e) => {
+    numberOft = document.getElementById("evaluations").value;
+    console.log(numberOft);
 });
